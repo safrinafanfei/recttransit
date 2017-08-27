@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+</head>
+<style>
+.level{
+    float:left;
+    width:10%;
+}
+
+
+
+
+.cf{
+    clear:both;
+}
+
+
+.axis {
+  font: 10px sans-serif;
+}
+
+
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 28px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {display:none;}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #ffcec5;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #ffcec5;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+      border-radius: 14px;
+
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.year_button:hover{
+    box-shadow: inset 0 0 7px rgba(0,0,0,.38);
+}
+
+.year_button:focus, .active{
+    background-color: #c0c0c0 !important;
+    outline: none;
+
+}
+
+.region_button{
+    background-color: rgb(196, 109, 93);
+    border:2px white;
+    display: inline-block;
+    margin: 1em 0 0 0;
+    padding: 0.32em 0.8em;
+    color: #fff;
+    border-radius: 4px;
+    pointer-events: all;
+    cursor: pointer;
+    outline: none;
+    font-size: 14px;
+
+}
+
+.region_button::after {
+    content: '\f064';
+    display: inline-block;
+    margin: 0 0 0 0.6em;
+    font-family: 'FontAwesome';
+}
+
+.year_button_l {
+/*    float: left;
+*/    padding: 0 9px;
+    margin-bottom: 0;
+    cursor: pointer;
+    border: 1px solid #bbb;
+    border-right: 1px solid #bbb;
+    box-shadow: inset 0 0 7px rgba(0,0,0,.18);
+    color: #000;
+    text-align: center;
+    font-family: Helvetica,sans-serif;
+    font-weight: 200;
+    letter-spacing: .02em;
+    font-size: 14px;
+    background-color: #eee;
+    width:80px;
+    height:25px;
+    border-radius:4px 0px 0px 4px;
+}
+
+.year_button_r {
+/*    float: left;
+*/    padding: 0 9px;
+    margin-bottom: 0;
+    cursor: pointer;
+    border: 1px solid #bbb;
+    border-right: 1px solid #bbb;
+    box-shadow: inset 0 0 7px rgba(0,0,0,.18);
+    color: #000;
+    text-align: center;
+    font-family: Helvetica,sans-serif;
+    font-weight: 200;
+    letter-spacing: .02em;
+    font-size: 14px;
+    background-color: #eee;
+    width:80px;
+    height:25px;
+    border-radius:0px 4px 4px 0px;
+}
+
+.graphic{
+    margin: 20px auto;
+    max-width: 1000px;
+}
+
+body{
+    margin: 20px auto;
+    max-width: 1000px;
+    font-family:lato, sans-serif;
+}
+
+div.tooltip {   
+    position: absolute;         
+    text-align: center;         
+    width: 110px;                    
+/*    height: 28px;                   
+*/    padding: 5px;               
+    font: 12px sans-serif;      
+    background: white; 
+    border: 1px black solid;        
+    pointer-events: none;           
+}
+
+.mouseover{
+    fill:black !important;
+}
+
+.hovericon{
+    position: relative;
+    top:10px;
+}
+
+.lg_sq{
+    background-color: black;
+    width:15px;
+    height:15px;
+    float:left;
+    margin-right: 5px;
+    margin-top: 20px;
+}
+
+.lg_tx{
+
+    float:left;
+    margin-right: 5px;
+    margin-top: 20px;
+}
+
+.col-1{
+background-color:rgb(170, 170, 170)
+}
+
+.col-2{
+background-color:rgb(255, 206, 197);
+}
+
+.col-3{
+  background-color:rgb(236, 163, 149);
+  
+}
+
+.col-4{
+  background-color:rgb(216, 71, 43);
+
+}
+
+.col-5{
+  background-color:rgb(196, 109, 93);
+  
+}
+
+.col-6{
+  background-color:rgb(158, 67, 50);
+   
+}
+
+.col-7{
+   background-color:black;
+ 
+}
+
+
+</style>
+
+<body>
+<h1>Medicare readmission penalties by hospital</h1>
+<!-- Rounded switch -->
+<div class="">Toggle between 
+    <button class="year_button year_button_l fy2015">FY2015</button><button class="year_button year_button_r fy2018 active">FY2018</button> , Or
+    <button class="region_button">
+    See regions 
+    </button>
+</div>
+<div>
+    <img class="hovericon" width="30px" src="click.svg">hover over to see each hospital&#39; penalty rate
+</div>
+<div class="legend_show">
+    <div class="lg_sq col-1"></div><div class="lg_tx">0</div>
+    <div class="lg_sq col-2"></div><div class="lg_tx">0.01%-0.5%</div>
+    <div class="lg_sq col-3"></div><div class="lg_tx">0.51%-1%</div>
+    <div class="lg_sq col-4"></div><div class="lg_tx">1.01%-1.5%</div>
+    <div class="lg_sq col-5"></div><div class="lg_tx">1.51%-2%</div>
+    <div class="lg_sq col-6"></div><div class="lg_tx">2.01%-2.5%</div>
+    <div class="lg_sq col-7"></div><div class="lg_tx">2.5%-3%</div>
+</div>
+
+
+<div class="graphic">
+</div>
+
+
+
+
+</body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="hospital_data.js"></script>
+
+<script type="text/javascript">
+    
+function drawChunk(year){
+    $(".graphic").width(0.9*window.innerWidth)
+    var svg_height = window.innerHeight;
+    var svg_width = $(".graphic").width();
+    console.log(svg_width);
+    var group_width = svg_width/8
+    var svg = d3.select(".graphic")
+        .append("svg")
+        .attr("width", svg_width)
+        .attr("height", svg_height)
+
+    var howManyAcross = Math.floor(svg_width / 35);
+
+    var group_0=group_1=group_2=group_3=group_4=group_5=group_6 = -1;
+    function findPosition(d){
+        var innerIndex = 0, outerIndex = 0;
+            if (d.rate == 0){
+                group_0 += 1;
+                outerIndex = 0;
+                innerIndex = group_0;
+                
+            }else if (d.rate> 0 && d.rate <=0.5){
+                group_1 += 1;
+                outerIndex = 1;
+                innerIndex = group_1;
+                               
+            }else if (d.rate> 0.5 && d.rate <=1){
+                group_2 += 1;
+                outerIndex = 2;
+                innerIndex = group_2;
+                                
+
+            }else if (d.rate> 1 && d.rate <=1.5){
+                group_3 += 1;
+                outerIndex = 3;
+                innerIndex = group_3;
+                                
+
+            }else if (d.rate> 1.5 && d.rate <=2){
+                group_4 += 1;
+                outerIndex = 4;
+                innerIndex = group_4;
+                                
+            }else if (d.rate> 2 && d.rate <=2.5){
+                group_5 += 1;
+                outerIndex = 5;
+                innerIndex = group_5;
+                                
+
+            }else{
+                group_6 +=1;
+                outerIndex = 6;
+                innerIndex = group_6;
+            }
+
+            return {'inner': innerIndex, 'outer': outerIndex};
+    
+    }
+
+    var nestedData = d3.nest()
+        .key(function(d){return d.year;})
+        .entries(hospitalData)
+
+    function initChunk(year){
+
+        // console.log(nestedData)
+        var dataYone = nestedData.filter(function(d){
+            return d.key == year;
+        })
+
+        var nestedByid = d3.nest()
+            .key(function(d){return d.id;})
+            .entries(hospitalData)
+
+        // console.log(nestedByid)
+
+        function drawLinechart(d){
+
+
+
+        }
+
+        // TODO: DRAW LINECHARTS INSIDE TOOLTIP
+        // console.log(dataYone)
+        var div = d3.select(".graphic").append("div")
+            .attr("class", "tooltip")
+            .data(nestedByid)
+            .style("opacity", 0);
+        
+
+        var squares = svg.selectAll("rect")
+            .data(dataYone[0].values)
+            .enter();
+        
+
+        
+        var rects = squares.append("rect");
+            rects.attr("x", function(d,i){
+                var myIndex = findPosition(d);
+                var result = group_width*myIndex.outer + ((myIndex.inner %Math.floor(group_width/6))*6);
+                return result;
+            });
+            
+            group_0=group_1=group_2=group_3=group_4=group_5=group_6 = -1;
+            rects.attr("y", function(d,i){
+                 
+                
+                return 50 + Math.floor(findPosition(d).inner/Math.floor(group_width/6))*6;
+            })
+            .attr("width", 5)
+            .attr("height", 5)
+            .style("fill", function(d){if (d.rate == 0){
+                    return "#aaaaaa"
+                }else if (d.rate> 0 && d.rate <=0.5){
+                    return "#FFCEC5"
+                }else if (d.rate> 0.5 && d.rate <=1){
+                    return "#eca395"
+                }else if (d.rate> 1 && d.rate <=1.5){
+                    return "#D8472B"
+                }else if (d.rate> 1.5 && d.rate <=2){
+                    return "#C46D5D"
+                }else if (d.rate> 2 && d.rate <=2.5){
+                    return "#9E4332"
+                }else{
+                    return "black"
+                };})
+            .attr("class", function(d) {
+                return "grid-item";
+                })
+            .attr("id", function(d) {
+                return d.hname + d.State;
+                })
+            .attr("class", "squares")
+            .on("mouseover", function(d) {
+                $(this).addClass("mouseover")    
+                div.transition()        
+                    .duration(200)      
+                    .style("opacity", .9);      
+                div.html("<div>" + d.year + "</div>" +  "<div><strong>"+d.hname + "<br/>"+ "<hr>"  + d.rate+"%" +"</strong></div>")  
+                    .style("left", (d3.event.pageX+6) + "px")     
+                    .style("top", (d3.event.pageY - 28) + "px");    
+                })                  
+            .on("mouseout", function(d) {
+                $(this).removeClass("mouseover")    
+                div.transition()        
+                    .duration(500)      
+                    .style("opacity", 0);   
+            });
+
+            var textData = [{"legend":"0","position":1}, {"legend":"0.01%-0.5%","position":2},{"legend":"0.51%-1%","position":3},{"legend":"1.01%-1.5%","position":4},{"legend":"1.51%-2%","position":5},{"legend":"2.01%-2.5%","position":6},{"legend":"2.51%-3%","position":7}]
+
+            d3.selectAll(".state_text").remove();
+            
+            var textGroup = svg.append("g")
+                            .selectAll("text")
+                            .data(textData)
+                            .enter()
+                            .append("text")
+                            .attr("class","distributions_text")
+
+            textGroup.attr("x",function(d){return (d.position-1) * group_width})
+                .attr("y",function(d){return 40})
+                .text(function(d){return d.legend})
+                .attr("font-family", "lato,sans-serif")
+                     .attr("font-size", "18px")
+                    // .attr("fill", "red");
+
+        
+            $(".legend_show").hide();
+
+    }
+
+    initChunk("FY2018");
+
+    function updateChunk(year){
+        var dataNew = nestedData.filter(function(d){
+            return d.key == year;
+        })
+
+        console.log(dataNew)          
+
+        var squares = d3.selectAll(".squares")
+            .data(dataNew[0].values);
+
+        group_0=group_1=group_2=group_3=group_4=group_5=group_6 = -1;
+
+        squares.exit()
+            .remove();
+
+        squares.transition()
+                // .delay(function(d, i) { return i * 1; })
+                .duration(1000)
+                .attr("x", function(d,i){
+                    var myIndex = findPosition(d);
+                    var result = group_width*myIndex.outer + ((myIndex.inner %Math.floor(group_width/6)*6));
+                    return result;
+                });
+                
+        
+        squares = d3.selectAll(".squares")
+            .data(dataNew[0].values);
+
+        var newSquares = squares.enter()
+               .append("rect")
+               .attr("x", function(d,i){
+                var myIndex = findPosition(d);
+                var result = group_width*myIndex.outer + ((myIndex.inner %Math.floor(group_width/6)*6));
+                return result;
+            });
+                
+
+               
+        group_0=group_1=group_2=group_3=group_4=group_5=group_6 = -1;
+
+        squares.attr("y", function(d,i){
+                    var myIndex = findPosition(d);
+                    var result = 50 + Math.floor(myIndex.inner/Math.floor(group_width/6))*6;
+                    return result;
+                });
+                
+        newSquares.attr("y", function(d,i){
+                    var myIndex = findPosition(d);
+                    var result = 50 + Math.floor(myIndex.inner/Math.floor(group_width/6))*6;
+                    return result;
+                });
+
+
+
+        var textData = [{"legend":"0","position":1}, {"legend":"0.01%-0.5%","position":2},{"legend":"0.51%-1%","position":"3"},{"legend":"1.01%-1.5%","position":"4"},{"legend":"1.51%-2%","position":"5"},{"legend":"2.01%-2.5%","position":"6"},{"legend":"2.51%-3%","position":7}]
+
+        d3.selectAll(".state_text").remove();
+        
+        var textGroup = svg.append("g")
+                        .selectAll("text")
+                        .data(textData)
+                        .enter()
+                        .append("text")
+                        .attr("class","distributions_text")
+
+        textGroup.attr("x",function(d){return (d.position-1) * group_width})
+            .attr("y",function(d){return 40})
+            .text(function(d){return d.legend})
+            .attr("font-family", "lato,sans-serif")
+            .attr("font-size", "18px")
+                // .attr("fill", "red");
+
+    }
+
+    function resizeChunk(){
+
+    }
+
+    function changetoRegion(year){
+        var dataNew = nestedData.filter(function(d){
+            return d.key == year;
+        })
+
+        var squares = d3.selectAll(".squares")
+            .data(dataNew[0].values)
+
+        squares.transition()
+            // .delay(function(d, i) { return i * 1; })
+            .duration(1000)
+            .attr("x", function(d,i){
+                var result;
+                if(d.stategroup ==0){
+                    result = d.stateorder * 30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
+                }else if(d.stategroup ==1){
+                    result = 30+6*13*Math.floor((svg_width-50)/25/6) + d.stateorder*30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
+                }else if(d.stategroup ==2){
+                    result = d.stateorder*30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
+                }else{
+                    result = 30+6*13*Math.floor((svg_width-50)/25/6) + d.stateorder*30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
+                }
+                console.log(result);
+                return result;
+            })
+            .attr("y", function(d,i){
+                var result;
+                if(d.stategroup <=1){
+                    result = 50 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6);
+                }else{
+                    result = 350 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6);
+                }
+                return result;
+
+            })
+
+
+
+                
+        squares.enter()
+               .append("rect")
+               .attr("x", function(d,i){
+                var result;
+                if(d.stategroup ==0){
+                    result = d.stateorder * 30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
+                }else if(d.stategroup ==1){
+                    result = 30+6*13*Math.floor((svg_width-50)/25/6) + d.stateorder*30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
+                }else if(d.stategroup ==2){
+                    result = d.stateorder*30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
+                }else{
+                    result = 30+6*13*Math.floor((svg_width-50)/25/6) + d.stateorder*30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
+                }
+                console.log(result);
+                return result;
+            })
+            .attr("y", function(d,i){
+            var result;
+            if(d.stategroup <=1){
+                result = 50 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6);
+            }else{
+                result = 350 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6);
+            }
+            return result;
+
+        })
+
+        var stateData = [{"region":"Northeast","region_code":0,"state":"CT","state_code":0},
+            {"region":"Northeast","region_code":0,"state":"DC","state_code":1},
+            {"region":"Northeast","region_code":0,"state":"DE","state_code":2},
+            {"region":"Northeast","region_code":0,"state":"MA","state_code":3},
+            {"region":"Northeast","region_code":0,"state":"ME","state_code":4},
+            {"region":"Northeast","region_code":0,"state":"NH","state_code":5},
+            {"region":"Northeast","region_code":0,"state":"NJ","state_code":6},
+            {"region":"Northeast","region_code":0,"state":"NY","state_code":7},
+            {"region":"Northeast","region_code":0,"state":"PA","state_code":8},
+            {"region":"Northeast","region_code":0,"state":"VT","state_code":9},
+            {"region":"South","region_code":2,"state":"AL","state_code":0},
+            {"region":"South","region_code":2,"state":"AR","state_code":1},
+            {"region":"South","region_code":2,"state":"FL","state_code":2},
+            {"region":"South","region_code":2,"state":"GA","state_code":3},
+            {"region":"South","region_code":2,"state":"KY","state_code":4},
+            {"region":"South","region_code":2,"state":"LA","state_code":5},
+            {"region":"South","region_code":2,"state":"MS","state_code":6},
+            {"region":"South","region_code":2,"state":"NC","state_code":7},
+            {"region":"South","region_code":2,"state":"OR","state_code":8},
+            {"region":"South","region_code":2,"state":"SC","state_code":9},
+            {"region":"South","region_code":2,"state":"TNB","state_code":10},
+            {"region":"South","region_code":2,"state":"TX","state_code":11},
+            {"region":"South","region_code":2,"state":"VA","state_code":12},
+            {"region":"South","region_code":2,"state":"WV","state_code":13},
+            {"region":"Midwest","region_code":1,"state":"IA","state_code":0},
+            {"region":"Midwest","region_code":1,"state":"IL","state_code":1},
+            {"region":"Midwest","region_code":1,"state":"IN","state_code":2},
+            {"region":"Midwest","region_code":1,"state":"KS","state_code":3},
+            {"region":"Midwest","region_code":1,"state":"MI","state_code":4},
+            {"region":"Midwest","region_code":1,"state":"MN","state_code":5},
+            {"region":"Midwest","region_code":1,"state":"MO","state_code":6},
+            {"region":"Midwest","region_code":1,"state":"ND","state_code":7},
+            {"region":"Midwest","region_code":1,"state":"NE","state_code":8},
+            {"region":"Midwest","region_code":1,"state":"OH","state_code":9},
+            {"region":"Midwest","region_code":1,"state":"OK","state_code":10},
+            {"region":"Midwest","region_code":1,"state":"SD","state_code":11},
+            {"region":"Midwest","region_code":1,"state":"WI","state_code":12},
+            {"region":"West","region_code":3,"state":"AK","state_code":0},
+            {"region":"West","region_code":3,"state":"AZ","state_code":1},
+            {"region":"West","region_code":3,"state":"CA","state_code":2},
+            {"region":"West","region_code":3,"state":"CO","state_code":3},
+            {"region":"West","region_code":3,"state":"HI","state_code":4},
+            {"region":"West","region_code":3,"state":"ID","state_code":5},
+            {"region":"West","region_code":3,"state":"MT","state_code":6},
+            {"region":"West","region_code":3,"state":"NM","state_code":7},
+            {"region":"West","region_code":3,"state":"NV","state_code":8},
+            {"region":"West","region_code":3,"state":"VT","state_code":9},
+            {"region":"West","region_code":3,"state":"WA","state_code":10},
+            {"region":"West","region_code":3,"state":"WY","state_code":11}]
+
+            d3.selectAll(".distributions_text").remove();
+
+            var statetextGroup = svg.append("g")
+                        .selectAll("text")
+                        .data(stateData)
+                        .enter()
+                        .append("text")
+                        .attr("class","state_text")
+
+                statetextGroup.attr("x",function(d){
+                    if(d.region_code <=1){
+                        return d.region_code * group_width*Math.floor((svg_width-50)/32/6) +d.state_code*30
+                    }
+                    else{
+                        return (d.region_code-2) * group_width*Math.floor((svg_width-50)/32/6)+d.state_code*30
+                    }
+
+                })
+                    .attr("y",function(d){if(d.region_code <=1){
+                        return 40
+                    }
+                    else{
+                        return 340 
+                    }})
+                    .text(function(d){return d.state})
+                    .attr("font-family", "lato,sans-serif")
+                         .attr("font-size", "14px")
+
+
+
+
+    }
+        return {"updateChunk":updateChunk, "resize":resizeChunk, "region":changetoRegion}
+
+}
+
+
+var myChart = drawChunk();
+
+var running = false;
+var timer;
+
+// $('.switch').on('click', function() {
+//     var buttonValue = $(this).val();    
+//     globalDatanew = "FY" + buttonValue;
+//     myChart.updateChunk("FY" + globalDatanew);
+// });
+
+jQuery.fn.clickToggle = function(a,b) {
+  function cb(){ [b,a][this._tog^=1].call(this); }
+  return this.on("click", cb);
+};
+
+$('.year_button_l').on("click",function(){
+        myChart.updateChunk("FY2015");
+        $(".legend_show").hide();
+        $(".active").removeClass("active");
+        $(".region_button").html("See regions")
+});
+
+$('.year_button_r').on("click",function(){
+        myChart.updateChunk("FY2018");
+        $(".legend_show").hide();
+        $(".region_button").html("See regions")
+})
+
+$(".region_button").clickToggle(function(){
+        $(".region_button").html("See distributions")
+        myChart.region("FY2018");
+        $(".legend_show").show();
+        $(".active").removeClass("active");
+
+},function(){
+        $(".region_button").html("See regions")
+        myChart.updateChunk("FY2018");
+        $(".legend_show").hide();
+})
+
+
+
+</script>
+</html>
