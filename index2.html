@@ -171,16 +171,16 @@ body{
     font-family:lato, sans-serif;
 }
 
-div.tooltip {   
-    position: absolute;         
-    text-align: center;         
-    width: 110px;                    
-/*    height: 28px;                   
-*/    padding: 5px;               
-    font: 12px sans-serif;      
-    background: white; 
-    border: 1px black solid;        
-    pointer-events: none;           
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    width: 110px;
+/*    height: 28px;
+*/    padding: 5px;
+    font: 12px sans-serif;
+    background: white;
+    border: 1px black solid;
+    pointer-events: none;
 }
 
 .mouseover{
@@ -218,7 +218,7 @@ background-color:rgb(255, 206, 197);
 
 .col-3{
   background-color:rgb(236, 163, 149);
-  
+
 }
 
 .col-4{
@@ -228,17 +228,17 @@ background-color:rgb(255, 206, 197);
 
 .col-5{
   background-color:rgb(196, 109, 93);
-  
+
 }
 
 .col-6{
   background-color:rgb(158, 67, 50);
-   
+
 }
 
 .col-7{
    background-color:black;
- 
+
 }
 
 
@@ -247,10 +247,10 @@ background-color:rgb(255, 206, 197);
 <body>
 <h1>Medicare readmission penalties by hospital</h1>
 <!-- Rounded switch -->
-<div class="">Toggle between 
+<div class="">Toggle between
     <button class="year_button year_button_l fy2015">FY2015</button><button class="year_button year_button_r fy2018 active">FY2018</button> , Or
     <button class="region_button">
-    See regions 
+    See regions
     </button>
 </div>
 <div>
@@ -279,7 +279,53 @@ background-color:rgb(255, 206, 197);
 <script src="hospital_data.js"></script>
 
 <script type="text/javascript">
-    
+var group_0=group_1=group_2=group_3=group_4=group_5=group_6 = -1;
+function resetGroups() {
+  group_0=group_1=group_2=group_3=group_4=group_5=group_6 = -1;
+}
+
+function addRectAttributes(rects, tooltipDiv) {
+  rects.attr("width", 5)
+    .attr("height", 5)
+    .style("fill", fillSquareColor)
+    .attr("id", function(d) {
+        return d.hname + d.State;
+        })
+    .attr("class", "grid-item squares")
+    .on("mouseover", function(d) {
+        $(this).addClass("mouseover")
+        tooltipDiv.transition()
+            .duration(200)
+            .style("opacity", .9);
+        tooltipDiv.html("<div>" + d.year + "</div>" +  "<div><strong>"+d.hname + "<br/>"+ "<hr>"  + d.rate+"%" +"</strong></div>")
+            .style("left", (d3.event.pageX+6) + "px")
+            .style("top", (d3.event.pageY - 28) + "px");
+        })
+    .on("mouseout", function(d) {
+        $(this).removeClass("mouseover")
+        tooltipDiv.transition()
+            .duration(500)
+            .style("opacity", 0);
+    });
+  return rects;
+}
+function fillSquareColor(d) {
+  if (d.rate == 0){
+      return "#aaaaaa";
+  }else if (d.rate> 0 && d.rate <=0.5){
+      return "#FFCEC5";
+  }else if (d.rate> 0.5 && d.rate <=1){
+      return "#eca395";
+  }else if (d.rate> 1 && d.rate <=1.5){
+      return "#D8472B";
+  }else if (d.rate> 1.5 && d.rate <=2){
+      return "#C46D5D";
+  }else if (d.rate> 2 && d.rate <=2.5){
+      return "#9E4332";
+  }else{
+      return "black";
+  }
+}
 function drawChunk(year){
     $(".graphic").width(0.9*window.innerWidth)
     var svg_height = window.innerHeight;
@@ -293,41 +339,41 @@ function drawChunk(year){
 
     var howManyAcross = Math.floor(svg_width / 35);
 
-    var group_0=group_1=group_2=group_3=group_4=group_5=group_6 = -1;
+    resetGroups();
     function findPosition(d){
         var innerIndex = 0, outerIndex = 0;
             if (d.rate == 0){
                 group_0 += 1;
                 outerIndex = 0;
                 innerIndex = group_0;
-                
+
             }else if (d.rate> 0 && d.rate <=0.5){
                 group_1 += 1;
                 outerIndex = 1;
                 innerIndex = group_1;
-                               
+
             }else if (d.rate> 0.5 && d.rate <=1){
                 group_2 += 1;
                 outerIndex = 2;
                 innerIndex = group_2;
-                                
+
 
             }else if (d.rate> 1 && d.rate <=1.5){
                 group_3 += 1;
                 outerIndex = 3;
                 innerIndex = group_3;
-                                
+
 
             }else if (d.rate> 1.5 && d.rate <=2){
                 group_4 += 1;
                 outerIndex = 4;
                 innerIndex = group_4;
-                                
+
             }else if (d.rate> 2 && d.rate <=2.5){
                 group_5 += 1;
                 outerIndex = 5;
                 innerIndex = group_5;
-                                
+
 
             }else{
                 group_6 +=1;
@@ -336,179 +382,92 @@ function drawChunk(year){
             }
 
             return {'inner': innerIndex, 'outer': outerIndex};
-    
+
     }
 
     var nestedData = d3.nest()
         .key(function(d){return d.year;})
-        .entries(hospitalData)
+        .entries(hospitalData);
 
-    function initChunk(year){
+    var nestedByid = d3.nest()
+        .key(function(d){return d.id;})
+        .entries(hospitalData);
+    var tooltipDiv = d3.select(".graphic").append("div")
+        .attr("class", "tooltip")
+        .data(nestedByid)
+        .style("opacity", 0);
+
+    function updateChunk(year){
 
         // console.log(nestedData)
         var dataYone = nestedData.filter(function(d){
             return d.key == year;
-        })
-
-        var nestedByid = d3.nest()
-            .key(function(d){return d.id;})
-            .entries(hospitalData)
-
-        // console.log(nestedByid)
-
-        function drawLinechart(d){
-
-
-
-        }
+        });
 
         // TODO: DRAW LINECHARTS INSIDE TOOLTIP
-        // console.log(dataYone)
-        var div = d3.select(".graphic").append("div")
-            .attr("class", "tooltip")
-            .data(nestedByid)
-            .style("opacity", 0);
+        var oldSquareNum = svg.selectAll("rect")[0].length;
+        var newSquareNum = svg.selectAll("rect")
+            .data(dataYone[0].values)[0].length;
+        var hasExistingRects = (oldSquareNum > 0);
+        var hasNewRects = (newSquareNum > oldSquareNum);
 
         var squares = svg.selectAll("rect")
-            .data(dataYone[0].values)
-            .enter();
-        
-        var rects = squares.append("rect");
-            rects.attr("x", function(d,i){
-                var myIndex = findPosition(d);
-                var result = group_width*myIndex.outer + ((myIndex.inner %Math.floor(group_width/6))*6);
-                return result;
-            });
-            
-            group_0=group_1=group_2=group_3=group_4=group_5=group_6 = -1;
-            rects.attr("y", function(d,i){
-                 
-                
-                return 50 + Math.floor(findPosition(d).inner/Math.floor(group_width/6))*6;
-            })
-            .attr("width", 5)
-            .attr("height", 5)
-            .style("fill", function(d){if (d.rate == 0){
-                    return "#aaaaaa"
-                }else if (d.rate> 0 && d.rate <=0.5){
-                    return "#FFCEC5"
-                }else if (d.rate> 0.5 && d.rate <=1){
-                    return "#eca395"
-                }else if (d.rate> 1 && d.rate <=1.5){
-                    return "#D8472B"
-                }else if (d.rate> 1.5 && d.rate <=2){
-                    return "#C46D5D"
-                }else if (d.rate> 2 && d.rate <=2.5){
-                    return "#9E4332"
-                }else{
-                    return "black"
-                };})
-            .attr("class", function(d) {
-                return "grid-item";
-                })
-            .attr("id", function(d) {
-                return d.hname + d.State;
-                })
-            .attr("class", "squares")
-            .on("mouseover", function(d) {
-                $(this).addClass("mouseover")    
-                div.transition()        
-                    .duration(200)      
-                    .style("opacity", .9);      
-                div.html("<div>" + d.year + "</div>" +  "<div><strong>"+d.hname + "<br/>"+ "<hr>"  + d.rate+"%" +"</strong></div>")  
-                    .style("left", (d3.event.pageX+6) + "px")     
-                    .style("top", (d3.event.pageY - 28) + "px");    
-                })                  
-            .on("mouseout", function(d) {
-                $(this).removeClass("mouseover")    
-                div.transition()        
-                    .duration(500)      
-                    .style("opacity", 0);   
-            });
-
-            var textData = [{"legend":"0","position":1}, {"legend":"0.01%-0.5%","position":2},{"legend":"0.51%-1%","position":3},{"legend":"1.01%-1.5%","position":4},{"legend":"1.51%-2%","position":5},{"legend":"2.01%-2.5%","position":6},{"legend":"2.51%-3%","position":7}]
-
-            d3.selectAll(".state_text").remove();
-            
-            var textGroup = svg.append("g")
-                            .selectAll("text")
-                            .data(textData)
-                            .enter()
-                            .append("text")
-                            .attr("class","distributions_text")
-
-            textGroup.attr("x",function(d){return (d.position-1) * group_width})
-                .attr("y",function(d){return 40})
-                .text(function(d){return d.legend})
-                .attr("font-family", "lato,sans-serif")
-                     .attr("font-size", "18px")
-                    // .attr("fill", "red");
-
-        
-            $(".legend_show").hide();
-
-    }
-
-    initChunk("FY2018");
-
-    function updateChunk(year){
-        var dataNew = nestedData.filter(function(d){
-            return d.key == year;
-        })
-
-        console.log(dataNew)          
-
-        var squares = d3.selectAll(".squares")
-            .data(dataNew[0].values);
-
-        group_0=group_1=group_2=group_3=group_4=group_5=group_6 = -1;
-
-        squares.exit()
-            .remove();
-
-        squares.transition()
-                // .delay(function(d, i) { return i * 1; })
-                .duration(1000)
-                .attr("x", function(d,i){
-                    var myIndex = findPosition(d);
-                    var result = group_width*myIndex.outer + ((myIndex.inner %Math.floor(group_width/6)*6));
-                    return result;
-                });
-                
-        
-        squares = d3.selectAll(".squares")
-            .data(dataNew[0].values);
-
+            .data(dataYone[0].values);
         var newSquares = squares.enter()
-               .append("rect")
-               .attr("x", function(d,i){
+               .append("rect");
+
+        // Step 1: Remove all unused data nodes first.
+        if (newSquareNum < oldSquareNum) {
+          squares.exit()
+            .remove();
+          // reset squares.
+          squares = svg.selectAll("rect")
+              .data(dataYone[0].values);
+        }
+
+        // Step 2: Update current DOM squares.
+        resetGroups();
+        // Old squares and new squares x should be calculated without resetting group.
+        if (hasExistingRects) {
+          squares = squares.transition()
+            // .delay(function(d, i) { return i * 1; })
+            .duration(1000)
+            .attr("x", function(d,i){
                 var myIndex = findPosition(d);
                 var result = group_width*myIndex.outer + ((myIndex.inner %Math.floor(group_width/6)*6));
                 return result;
             });
-                
+        }
+        // Step 3: Create new squares.
+        if (hasNewRects){
+          newSquares = addRectAttributes(newSquares, tooltipDiv);
+          newSquares.attr("x", function(d,i){
+              var myIndex = findPosition(d);
+              var result = group_width*myIndex.outer + ((myIndex.inner %Math.floor(group_width/6))*6);
+              return result;
+          });
+        }
 
-               
-        group_0=group_1=group_2=group_3=group_4=group_5=group_6 = -1;
+        // Old squares and new squares y should be calculated together.
+        resetGroups();
+        if (hasExistingRects) {
+          squares.attr("y", function(d,i){
+            var myIndex = findPosition(d);
+            var result = 50 + Math.floor(myIndex.inner/Math.floor(group_width/6))*6;
+            return result;
+          });
+        }
+        if (hasNewRects){
+          newSquares.attr("y", function(d,i){
+              return 50 + Math.floor(findPosition(d).inner/Math.floor(group_width/6))*6;
+          });
+        }
 
-        squares.attr("y", function(d,i){
-                    var myIndex = findPosition(d);
-                    var result = 50 + Math.floor(myIndex.inner/Math.floor(group_width/6))*6;
-                    return result;
-                });
-                
-        newSquares.attr("y", function(d,i){
-                    var myIndex = findPosition(d);
-                    var result = 50 + Math.floor(myIndex.inner/Math.floor(group_width/6))*6;
-                    return result;
-                });
-
-
-
-        var textData = [{"legend":"0","position":1}, {"legend":"0.01%-0.5%","position":2},{"legend":"0.51%-1%","position":"3"},{"legend":"1.01%-1.5%","position":"4"},{"legend":"1.51%-2%","position":"5"},{"legend":"2.01%-2.5%","position":"6"},{"legend":"2.51%-3%","position":7}]
+        // Draw the legends
+        var textData = [{"legend":"0","position":1}, {"legend":"0.01%-0.5%","position":2},{"legend":"0.51%-1%","position":3},{"legend":"1.01%-1.5%","position":4},{"legend":"1.51%-2%","position":5},{"legend":"2.01%-2.5%","position":6},{"legend":"2.51%-3%","position":7}]
 
         d3.selectAll(".state_text").remove();
-        
+
         var textGroup = svg.append("g")
                         .selectAll("text")
                         .data(textData)
@@ -520,10 +479,12 @@ function drawChunk(year){
             .attr("y",function(d){return 40})
             .text(function(d){return d.legend})
             .attr("font-family", "lato,sans-serif")
-            .attr("font-size", "18px")
+                 .attr("font-size", "18px")
                 // .attr("fill", "red");
-
+        $(".legend_show").hide();
     }
+
+    updateChunk("FY2018");
 
     function resizeChunk(){
 
@@ -565,9 +526,6 @@ function drawChunk(year){
 
             })
 
-
-
-                
         squares.enter()
                .append("rect")
                .attr("x", function(d,i){
@@ -667,7 +625,7 @@ function drawChunk(year){
                         return 40
                     }
                     else{
-                        return 340 
+                        return 340
                     }})
                     .text(function(d){return d.state})
                     .attr("font-family", "lato,sans-serif")
@@ -677,7 +635,7 @@ function drawChunk(year){
 
 
     }
-        return {"updateChunk":updateChunk, "resize":resizeChunk, "region":changetoRegion}
+    return {"updateChunk":updateChunk, "resize":resizeChunk, "region":changetoRegion};
 
 }
 
@@ -688,7 +646,7 @@ var running = false;
 var timer;
 
 // $('.switch').on('click', function() {
-//     var buttonValue = $(this).val();    
+//     var buttonValue = $(this).val();
 //     globalDatanew = "FY" + buttonValue;
 //     myChart.updateChunk("FY" + globalDatanew);
 // });
