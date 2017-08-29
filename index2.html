@@ -647,37 +647,37 @@ var timer;
 //     globalDatanew = "FY" + buttonValue;
 //     myChart.updateChunk("FY" + globalDatanew);
 // });
-
-jQuery.fn.clickToggle = function(a,b) {
-  function cb(){ [b,a][this._tog^=1].call(this); }
-  return this.on("click", cb);
-};
+var regionShown = false;
 
 $('.year_button_l').on("click",function(){
         myChart.updateChunk("FY2015");
         $(".legend_show").hide();
         $(".active").removeClass("active");
-        $(".region_button").html("See regions")
+        $(".region_button").html("See regions");
+        regionShown = false;
 });
 
 $('.year_button_r').on("click",function(){
         myChart.updateChunk("FY2018");
         $(".legend_show").hide();
-        $(".region_button").html("See regions")
+        $(".region_button").html("See regions");
+        regionShown = false;
 })
 
-$(".region_button").clickToggle(function(){
-        $(".region_button").html("See distributions");
+$(".region_button").on("click", function(){
+    if (!regionShown) {
+        $(".region_button").html("See distributions")
         myChart.region("FY2018");
         $(".legend_show").show();
         $(".active").removeClass("active");
-
-},function(){
-        $(".region_button").html("See regions");
+        regionShown = true;
+    } else {
+        $(".region_button").html("See regions")
         myChart.updateChunk("FY2018");
         $(".legend_show").hide();
-})
-
+        regionShown = false;
+    }
+});
 
 
 </script>
