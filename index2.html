@@ -254,7 +254,7 @@ background-color:rgb(255, 206, 197);
     </button>
 </div>
 <div>
-    <img class="hovericon" width="30px" src="click.svg">hover over to see each hospital&#39; penalty rate
+    <img class="hovericon" width="30px" src="click.svg">hover over to see each hospital&#39;s penalty rate
 </div>
 <div class="legend_show">
     <div class="lg_sq col-1"></div><div class="lg_tx">0</div>
@@ -271,7 +271,7 @@ background-color:rgb(255, 206, 197);
 </div>
 
 
-
+<div class="source">Source: Kaiser Family Foundation</div>
 
 </body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
@@ -368,13 +368,10 @@ function drawChunk(year){
             .attr("class", "tooltip")
             .data(nestedByid)
             .style("opacity", 0);
-        
 
         var squares = svg.selectAll("rect")
             .data(dataYone[0].values)
             .enter();
-        
-
         
         var rects = squares.append("rect");
             rects.attr("x", function(d,i){
@@ -618,7 +615,7 @@ function drawChunk(year){
             {"region":"South","region_code":2,"state":"NC","state_code":7},
             {"region":"South","region_code":2,"state":"OR","state_code":8},
             {"region":"South","region_code":2,"state":"SC","state_code":9},
-            {"region":"South","region_code":2,"state":"TNB","state_code":10},
+            {"region":"South","region_code":2,"state":"TN","state_code":10},
             {"region":"South","region_code":2,"state":"TX","state_code":11},
             {"region":"South","region_code":2,"state":"VA","state_code":12},
             {"region":"South","region_code":2,"state":"WV","state_code":13},
