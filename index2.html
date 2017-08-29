@@ -491,13 +491,14 @@ function drawChunk(year){
     }
 
     function changetoRegion(year){
+        // First update the graph to the year.
+        updateChunk(year);
         var dataNew = nestedData.filter(function(d){
             return d.key == year;
-        })
+        });
 
-        var squares = d3.selectAll(".squares")
-            .data(dataNew[0].values)
-
+        var squares = d3.selectAll("svg .squares")
+            .data(dataNew[0].values);
         squares.transition()
             // .delay(function(d, i) { return i * 1; })
             .duration(1000)
@@ -551,7 +552,7 @@ function drawChunk(year){
             }
             return result;
 
-        })
+        });
 
         var stateData = [{"region":"Northeast","region_code":0,"state":"CT","state_code":0},
             {"region":"Northeast","region_code":0,"state":"DC","state_code":1},
@@ -621,19 +622,15 @@ function drawChunk(year){
                     }
 
                 })
-                    .attr("y",function(d){if(d.region_code <=1){
-                        return 40
-                    }
-                    else{
-                        return 340
-                    }})
-                    .text(function(d){return d.state})
-                    .attr("font-family", "lato,sans-serif")
-                         .attr("font-size", "14px")
-
-
-
-
+                .attr("y",function(d){if(d.region_code <=1){
+                    return 40
+                }
+                else{
+                    return 340
+                }})
+                .text(function(d){return d.state})
+                .attr("font-family", "lato,sans-serif")
+                     .attr("font-size", "14px");
     }
     return {"updateChunk":updateChunk, "resize":resizeChunk, "region":changetoRegion};
 
@@ -670,13 +667,13 @@ $('.year_button_r').on("click",function(){
 })
 
 $(".region_button").clickToggle(function(){
-        $(".region_button").html("See distributions")
+        $(".region_button").html("See distributions");
         myChart.region("FY2018");
         $(".legend_show").show();
         $(".active").removeClass("active");
 
 },function(){
-        $(".region_button").html("See regions")
+        $(".region_button").html("See regions");
         myChart.updateChunk("FY2018");
         $(".legend_show").hide();
 })
