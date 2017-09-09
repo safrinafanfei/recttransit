@@ -1,0 +1,91 @@
+<script>
+svg_height = window.innerHeight * 4
+
+svg = d3.select(".graphic")
+	.append("svg")
+	.attr("width", svg_width)
+	.attr("height", svg_height)
+
+howManyAcross = Math.floor(svg_width/35)
+
+var oldSquareNum = svg.selectAll("rect")[0].length;
+var newSquareNum = svg.selectAll("rect")
+    .data(dataYone[0].values)[0].length;
+var hasExistingRects = (oldSquareNum > 0);
+var hasNewRects = (newSquareNum > oldSquareNum);
+
+var squares = svg.selectAll("rect")
+    .data(dataYone[0].values);
+var newSquares = squares.enter()
+       .append("rect");
+
+// Step 1: Remove all unused data nodes first.
+if (newSquareNum < oldSquareNum) {
+  squares.exit()
+    .remove();
+  // reset squares.
+  squares = svg.selectAll("rect")
+      .data(dataYone[0].values);
+}
+
+// Step 2: Update current DOM squares.
+resetGroups();
+// Old squares and new squares x should be calculated without resetting group.
+var group_height = svg_height/6;
+
+if (hasExistingRects) {
+  squares = squares.transition()
+    // .delay(function(d, i) { return i * 1; })
+    .duration(1000)
+    .attr("x", function(d,i){
+        var myIndex = findPosition(d);
+        var result = (myIndex.inner %Math.floor(svg_width/6)*6);
+        return result;
+    });
+}
+// Step 3: Create new squares.
+if (hasNewRects){
+  newSquares = addRectAttributes(newSquares, tooltipDiv);
+  newSquares.attr("x", function(d,i){
+      var myIndex = findPosition(d);
+      var result = (myIndex.inner %Math.floor(svg_width/6)*6);
+      return result;
+  });
+}
+
+// Old squares and new squares y should be calculated together.
+resetGroups();
+if (hasExistingRects) {
+  squares.attr("y", function(d,i){
+    var myIndex = findPosition(d);
+    var result = 50 +  group_height * myIndex.outer + Math.floor(myIndex.inner/Math.floor(group_width/6))*6;
+    return result;
+  });
+}
+if (hasNewRects){
+  newSquares.attr("y", function(d,i){
+      return 50 +  group_height * myIndex.outer + Math.floor(findPosition(d).inner/Math.floor(group_width/6))*6;
+  });
+}
+
+// Draw the legends
+var textData = [{"legend":"0","position":1}, {"legend":"0.01%-0.5%","position":2},{"legend":"0.51%-1%","position":3},{"legend":"1.01%-1.5%","position":4},{"legend":"1.51%-2%","position":5},{"legend":"2.01%-2.5%","position":6},{"legend":"2.51%-3%","position":7}]
+
+d3.selectAll(".state_text").remove();
+
+var textGroup = svg.append("g")
+                .selectAll("text")
+                .data(textData)
+                .enter()
+                .append("text")
+                .attr("class","distributions_text")
+
+textGroup.attr("x",function(d){return 40})
+    .attr("y",function(d){return (d.position-1) * group_height})
+    .text(function(d){return d.legend})
+    .attr("font-family", "lato,sans-serif")
+         .attr("font-size", "18px")
+        // .attr("fill", "red");
+$(".legend_show").hide();
+
+</script>
