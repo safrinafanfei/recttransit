@@ -5,6 +5,7 @@
 
     <title></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Playfair+Display" rel="stylesheet">
 
 </head>
 <style>
@@ -164,7 +165,6 @@ input:checked + .slider:before {
 
 .graphic{
     margin: 20px auto;
-    max-width: 1000px;
 }
 
 body{
@@ -243,18 +243,42 @@ background-color:rgb(255, 206, 197);
 
 }
 
+h1{
+    font-family: 'Playfair Display', Georgia,serif;
+    font-size: 1.9em;
+
+}
+
 h1,.toggles,.hovers{
   text-align: center;
+
+}
+
+.source{
+        margin: 2% auto;
+    color: grey;
+    font-size: 12px;
+}
+
+    .legend_show{
+        margin: 0 auto;
+        width: 354px;
+    }
+
+@media only screen and (max-width:768px){
+
+    
 }
 @media only screen and (max-width:524px) {
 
   .lg_sq{
-    width:7px;
-    height:7px;
+    width:8px;
+    height:8px;
+    margin-top: 23px;
   }
 
   .lg_tx{
-    font-size: 8px;
+    font-size: 11px;
   }
 
   .legend_show{
@@ -269,6 +293,21 @@ h1,.toggles,.hovers{
     margin: 0 2%;
   }
 
+  text.state_text,.distributions_text {
+    font-size: 11px;
+  }
+
+  .graphic {
+     margin: 0px 1%; 
+    max-width: 1000px;
+    }
+
+  body{
+    margin: 0 2%;
+  }
+
+
+
 }
 
 @media only screen and (max-width:320px) {
@@ -279,7 +318,7 @@ h1,.toggles,.hovers{
   }
 
   .lg_tx{
-    font-size: 8px;
+    font-size: 11px;
   }
 
   .legend_show{
@@ -287,11 +326,15 @@ h1,.toggles,.hovers{
   }
 
   svg{
-    margin: 0 2%;
+    margin: 0 1%;
   }
 
   body{
-    overflow-x: hidden;
+    margin: 0 2%;
+  }
+
+  h1{
+    font-size: 1.8em;
   }
 
 }
@@ -299,7 +342,7 @@ h1,.toggles,.hovers{
 </style>
 
 <body>
-<h1>Medicare readmission penalties by hospital</h1>
+<h1>Hospitals reduce readmissions, but pace of improvement likely to slow</h1>
 <!-- Rounded switch -->
 <div class="toggles">Toggle between
     <button class="year_button year_button_l fy2015">FY2015</button><button class="year_button year_button_r fy2018 active">FY2018</button> ,
@@ -318,10 +361,16 @@ h1,.toggles,.hovers{
     <div class="lg_sq col-2"></div><div class="lg_tx">0.01%-0.5%</div>
     <div class="lg_sq col-3"></div><div class="lg_tx">0.51%-1%</div>
     <div class="lg_sq col-4"></div><div class="lg_tx">1.01%-1.5%</div>
+</div>
+<div class="cf"></div>
+<div class="legend_show margin_top_negative">
+
     <div class="lg_sq col-5"></div><div class="lg_tx">1.51%-2%</div>
     <div class="lg_sq col-6"></div><div class="lg_tx">2.01%-2.5%</div>
     <div class="lg_sq col-7"></div><div class="lg_tx">2.5%-3%</div>
 </div>
+<div class="cf"></div>
+
 
 
 <div class="graphic">
@@ -342,8 +391,20 @@ function resetGroups() {
 }
 
 function addRectAttributes(rects, tooltipDiv) {
-  rects.attr("width", 5)
-    .attr("height", 5)
+  rects.attr("width", function(){
+    if(window.innerWidth > 769){
+        return 5;
+    }else{
+        return 3;
+    }
+  })
+    .attr("height", function(){
+    if(window.innerWidth > 769){
+        return 5;
+    }else{
+        return 3;
+    }
+  })
     .style("fill", fillSquareColor)
     .attr("id", function(d) {
         return d.hname + d.State;
@@ -384,11 +445,23 @@ function fillSquareColor(d) {
   }
 }
 function drawChunk(year){
-    $(".graphic").width(0.9*window.innerWidth)
-    var svg_height = 500;
-    var svg_width = $(".graphic").width();
+    $(".graphic").width(850)
+    var svg_height = function(){if(window.innerWidth>769){return 450}else{return 450}};
+    var svg_width;
+    if(window.innerWidth>=550 && window.innerWidth<769){
+            svg_width = 354;
+            $(".graphic").width(354)
+            }else if(window.innerWidth<550){
+                svg_width = window.innerWidth *0.9
+                $(".graphic").width(svg_width)
+            }
+        else{
+            svg_width = $(".graphic").width();
+        }
+    
+
     console.log(svg_width);
-    var group_width = svg_width/8
+    var group_width = svg_width/7.2
     var svg = d3.select(".graphic")
         .append("svg")
         .attr("width", svg_width)
@@ -399,37 +472,45 @@ function drawChunk(year){
     resetGroups();
     function findPosition(d){
         var innerIndex = 0, outerIndex = 0;
+        var total_height;
             if (d.rate == 0){
                 group_0 += 1;
                 outerIndex = 0;
                 innerIndex = group_0;
+                total_height = 0;
             }else if (d.rate> 0 && d.rate <=0.5){
                 group_1 += 1;
                 outerIndex = 1;
                 innerIndex = group_1;
+                total_height = 60;
             }else if (d.rate> 0.5 && d.rate <=1){
                 group_2 += 1;
                 outerIndex = 2;
                 innerIndex = group_2;
+                total_height = 150;
             }else if (d.rate> 1 && d.rate <=1.5){
                 group_3 += 1;
                 outerIndex = 3;
                 innerIndex = group_3;
+                total_height = 210;
             }else if (d.rate> 1.5 && d.rate <=2){
                 group_4 += 1;
                 outerIndex = 4;
                 innerIndex = group_4;
+                total_height = 260;
             }else if (d.rate> 2 && d.rate <=2.5){
                 group_5 += 1;
                 outerIndex = 5;
                 innerIndex = group_5;
+                total_height = 300;
             }else{
                 group_6 +=1;
                 outerIndex = 6;
                 innerIndex = group_6;
+                total_height = 340;
             }
 
-            return {'inner': innerIndex, 'outer': outerIndex};
+            return {'inner': innerIndex, 'outer': outerIndex, 'total_h': total_height};
 
     }
 
@@ -446,7 +527,26 @@ function drawChunk(year){
         .style("opacity", 0);
 
     function updateChunk(year){
-            d3.selectAll(".distributions_text").remove();
+        $(".graphic").width(850)
+        svg_height = function(){if(window.innerWidth>769){return 450}else{return 450}};
+        if(window.innerWidth>=550 && window.innerWidth<769){
+            svg_width = 354;
+            $(".graphic").width(354)
+
+            }else if(window.innerWidth<550){
+                svg_width = window.innerWidth *0.9
+                $(".graphic").width(svg_width)
+
+            }
+        else{
+            svg_width = $(".graphic").width();
+        }
+        d3.select("svg")
+            .attr("width", svg_width)
+            .attr("height", svg_height)
+
+
+        d3.selectAll(".distributions_text").remove();
 
         // console.log(nestedData)
         var dataYone = nestedData.filter(function(d){
@@ -482,18 +582,30 @@ function drawChunk(year){
             // .delay(function(d, i) { return i * 1; })
             .duration(1000)
             .attr("x", function(d,i){
+                if(window.innerWidth>769){
+                    var myIndex = findPosition(d);
+                    var result = group_width*myIndex.outer + ((myIndex.inner %Math.floor(group_width/6)*6));
+                    return result;
+                }else{
                 var myIndex = findPosition(d);
-                var result = group_width*myIndex.outer + ((myIndex.inner %Math.floor(group_width/6)*6));
+                var result = (myIndex.inner %Math.floor(svg_width/4))*4;
                 return result;
+                }
             });
         }
         // Step 3: Create new squares.
         if (hasNewRects){
           newSquares = addRectAttributes(newSquares, tooltipDiv);
           newSquares.attr("x", function(d,i){
+            if(window.innerWidth>769){
               var myIndex = findPosition(d);
               var result = group_width*myIndex.outer + ((myIndex.inner %Math.floor(group_width/6))*6);
               return result;
+            }else{
+              var myIndex = findPosition(d);
+              var result = (myIndex.inner %Math.floor(svg_width/4))*4;
+              return result;
+            }
           });
         }
 
@@ -501,19 +613,31 @@ function drawChunk(year){
         resetGroups();
         if (hasExistingRects) {
           squares.attr("y", function(d,i){
-            var myIndex = findPosition(d);
-            var result = 50 + Math.floor(myIndex.inner/Math.floor(group_width/6))*6;
-            return result;
+            if(window.innerWidth>769){
+                var myIndex = findPosition(d);
+                var result = 50 + Math.floor(myIndex.inner/Math.floor(group_width/6))*6;
+                return result;
+            }else{
+                var myIndex = findPosition(d);
+
+                var result = 40 + myIndex.total_h + Math.floor(myIndex.inner/Math.floor(svg_width/4))*4;
+                return result;
+            }
           });
         }
         if (hasNewRects){
           newSquares.attr("y", function(d,i){
+            if(window.innerWidth>769){
               return 50 + Math.floor(findPosition(d).inner/Math.floor(group_width/6))*6;
+            }else{
+                var myIndex = findPosition(d);
+              return 40 + myIndex.total_h + Math.floor(myIndex.inner/Math.floor(svg_width/4))*4;
+            }
           });
         }
 
         // Draw the legends
-        var textData = [{"legend":"0","position":1}, {"legend":"0.01%-0.5%","position":2},{"legend":"0.51%-1%","position":3},{"legend":"1.01%-1.5%","position":4},{"legend":"1.51%-2%","position":5},{"legend":"2.01%-2.5%","position":6},{"legend":"2.51%-3%","position":7}]
+        var textData = [{"legend":"0","position":1, "rate":0}, {"legend":"0.01%-0.5%","position":2,"rate":0.01},{"legend":"0.51%-1%","position":3,"rate":0.51},{"legend":"1.01%-1.5%","position":4,"rate":1.01},{"legend":"1.51%-2%","position":5,"rate":1.51},{"legend":"2.01%-2.5%","position":6,"rate":2.01},{"legend":"2.51%-3%","position":7,"rate":2.51}]
 
         d3.selectAll(".state_text").remove();
 
@@ -524,8 +648,22 @@ function drawChunk(year){
                         .append("text")
                         .attr("class","distributions_text")
 
-        textGroup.attr("x",function(d){return (d.position-1) * group_width})
-            .attr("y",function(d){return 40})
+        textGroup.attr("x",function(d){
+            if(window.innerWidth > 769){
+                    return (d.position-1) * group_width
+                }else{
+                    return 0
+                }
+            })
+            .attr("y",function(d,i){
+
+                if(window.innerWidth > 769){
+                  return 40  
+              }else{
+                  var myIndex = findPosition(d);
+                  return myIndex.total_h +35
+              }
+            })
             .text(function(d){return d.legend})
             .attr("font-family", "lato,sans-serif")
                  .attr("font-size", "18px")
@@ -538,8 +676,25 @@ function drawChunk(year){
 
 
     function changetoRegion(year){
-        // First update the graph to the year.
         updateChunk(year);
+
+        svg_height = function(){if(window.innerWidth>769){return 850}else{return 1300}};
+        if(window.innerWidth>=550 && window.innerWidth<769){
+            svg_width = 354;
+            $(".graphic").width(354)
+            }else if(window.innerWidth<550){
+                svg_width = window.innerWidth *0.9;
+                $(".graphic").width(svg_width)
+
+            }
+        else{
+            svg_width = $(".graphic").width();
+        }
+        
+    d3.select("svg")
+        .attr("width", svg_width)
+        .attr("height", svg_height)
+        // First update the graph to the year.
         var dataNew = nestedData.filter(function(d){
             return d.key == year;
         });
@@ -550,26 +705,40 @@ function drawChunk(year){
             // .delay(function(d, i) { return i * 1; })
             .duration(1000)
             .attr("x", function(d,i){
-                var result;
-                if(d.stategroup ==0){
-                    result = d.stateorder * 30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
+                if(window.innerWidth > 769){
+                    var result;
+                    if(d.stategroup ==0){
+                        result = d.stateorder * 30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6
                 }else if(d.stategroup ==1){
                     result = 30+6*13*Math.floor((svg_width-50)/25/6) + d.stateorder*30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
                 }else if(d.stategroup ==2){
                     result = d.stateorder*30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
                 }else{
                     result = 30+6*13*Math.floor((svg_width-50)/25/6) + d.stateorder*30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
+                }}else{
+                    var result;
+                    result = d.stateorder * 25+((d.stateposition-1) %Math.floor((svg_width-50)/15/4))*4;
                 }
                 console.log(result);
                 return result;
             })
             .attr("y", function(d,i){
+
                 var result;
-                if(d.stategroup <=1){
-                    result = 50 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6);
+                if(window.innerWidth>769){
+                    if(d.stategroup <=1){
+                        result = 50 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6);
+                    }else{
+                        result = 350 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6);
+                    }
                 }else{
-                    result = 350 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6);
+                    if(d.stategroup == 0 || d.stategroup ==1 || d.stategroup ==2){
+                        result = 35 + 230*d.stategroup + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/15/4))*4);
+                    }else{
+                      result = 35 + 280*d.stategroup + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/15/4))*4);
+                    }
                 }
+                
                 return result;
 
             })
@@ -578,27 +747,40 @@ function drawChunk(year){
                .append("rect")
                .attr("x", function(d,i){
                 var result;
-                if(d.stategroup ==0){
-                    result = d.stateorder * 30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
-                }else if(d.stategroup ==1){
-                    result = 30+6*13*Math.floor((svg_width-50)/25/6) + d.stateorder*30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
-                }else if(d.stategroup ==2){
-                    result = d.stateorder*30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
+                if(window.innerWidth>769){
+                    if(d.stategroup ==0){
+                        result = d.stateorder * 30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
+                    }else if(d.stategroup ==1){
+                        result = 30+6*13*Math.floor((svg_width-50)/25/6) + d.stateorder*30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
+                    }else if(d.stategroup ==2){
+                        result = d.stateorder*30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
+                    }else{
+                        result = 30+6*13*Math.floor((svg_width-50)/25/6) + d.stateorder*30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
+                    }
                 }else{
-                    result = 30+6*13*Math.floor((svg_width-50)/25/6) + d.stateorder*30+((d.stateposition-1) %Math.floor((svg_width-50)/32/6))*6;
+                    result = 3+d.stateorder * 25+((d.stateposition-1) %Math.floor((svg_width-50)/15/4))*4;
                 }
-                console.log(result);
+                
                 return result;
             })
             .attr("y", function(d,i){
             var result;
-            if(d.stategroup <=1){
+            if(window.innerWidth>769){
+                if(d.stategroup <=1){
                 result = 50 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6);
+                }else{
+                    result = 350 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6);
+                }
             }else{
-                result = 350 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6);
-            }
-            return result;
-
+                if(d.stategroup == 0 || d.stategroup ==1 || d.stategroup ==2){
+                  var result;
+                    result = 35 + 230*d.stategroup + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/15/4))*4);
+                }else{
+                  var result;
+                      result = 35 + 280*d.stategroup + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/15/4))*4);
+                }
+            }   
+                return result;
             });
 
         var stateData = [{"region":"Northeast","region_code":0,"state":"CT","state_code":0},
@@ -661,69 +843,41 @@ function drawChunk(year){
                         .attr("class","state_text")
 
                 statetextGroup.attr("x",function(d){
-                    if(d.region_code <=1){
-                        return d.region_code * group_width*Math.floor((svg_width-50)/32/6) +d.state_code*30
-                    }
-                    else{
-                        return (d.region_code-2) * group_width*Math.floor((svg_width-50)/32/6)+d.state_code*30
-                    }
+                    if(window.innerWidth >769){
+                        if(d.region_code <=1){
 
+                            return d.region_code * 420 +d.state_code*30
+                        }else{
+                            return (d.region_code-2) *420+d.state_code*30
+                        }
+                    }else{
+                        return d.state_code*25
+                    }
+                    
                 })
-                .attr("y",function(d){if(d.region_code <=1){
-                    return 40
-                }
-                else{
-                    return 340
-                }})
+                .attr("y",function(d){
+                    if(window.innerWidth >769){
+                        if(d.region_code <=1){
+                            return 40
+                        }else{
+                            return 340
+                        }
+                    }else{
+                        if(d.region_code == 0 || d.region_code == 1 || d.region_code ==2){
+                          return 30+d.region_code * 230
+                        } else{
+                          return 30+d.region_code * 280
+                        }  
+                    }
+                    
+                })
                 .text(function(d){return d.state})
                 .attr("font-family", "lato,sans-serif")
                      .attr("font-size", "14px");
     } 
 
 
-    function updateMobileChunk(){
-        function findPosition(d){
-            var innerIndex = 0, outerIndex = 0;
-                if (d.rate == 0){
-                    group_0 += 1;
-                    outerIndex = 0;
-                    innerIndex = group_0;
-                    total_height = 0;
-                }else if (d.rate> 0 && d.rate <=0.5){
-                    group_1 += 1;
-                    outerIndex = 1;
-                    innerIndex = group_1;
-                    total_height = 120;
-                }else if (d.rate> 0.5 && d.rate <=1){
-                    group_2 += 1;
-                    outerIndex = 2;
-                    innerIndex = group_2;
-                    total_height = 310;
-                }else if (d.rate> 1 && d.rate <=1.5){
-                    group_3 += 1;
-                    outerIndex = 3;
-                    innerIndex = group_3;
-                    total_height = 440;
-                }else if (d.rate> 1.5 && d.rate <=2){
-                    group_4 += 1;
-                    outerIndex = 4;
-                    innerIndex = group_4;
-                    total_height = 540;
-                }else if (d.rate> 2 && d.rate <=2.5){
-                    group_5 += 1;
-                    outerIndex = 5;
-                    innerIndex = group_5;
-                    total_height = 620;
-                }else{
-                    group_6 +=1;
-                    outerIndex = 6;
-                    innerIndex = group_6;
-                    total_height = 690;
-                }
 
-                return {'inner': innerIndex, 'outer': outerIndex, 'total_h': total_height};
-
-        }
 
         // var mobileSquares = d3.selectAll("svg .squares")
 
@@ -744,7 +898,6 @@ function drawChunk(year){
 
 
 
-    }
     return {"updateChunk":updateChunk,  "region":changetoRegion, };
 
 }
@@ -790,426 +943,13 @@ $(".region_button").on("click", function(){
 });
 
 
-function mobileFunction(){
-    function addRectAttributes(rects, tooltipDiv) {
-  rects.attr("width", 4)
-    .attr("height", 4)
-    .style("fill", fillSquareColor)
-    .attr("id", function(d) {
-        return d.hname + d.State;
-        })
-    .attr("class", "grid-item squares")
-    .on("mouseover", function(d) {
-        $(this).addClass("mouseover")
-        tooltipDiv.transition()
-            .duration(200)
-            .style("opacity", .9);
-        tooltipDiv.html("<div>" + d.year + "</div>" +  "<div><strong>"+d.hname + "<br/>"+ "<hr>"  + d.rate+"%" +"</strong></div>")
-            .style("left", (d3.event.pageX+6) + "px")
-            .style("top", (d3.event.pageY - 28) + "px");
-        })
-    .on("mouseout", function(d) {
-        $(this).removeClass("mouseover")
-        tooltipDiv.transition()
-            .duration(500)
-            .style("opacity", 0);
-    });
-  return rects;
-}
-function fillSquareColor(d) {
-  if (d.rate == 0){
-      return "#aaaaaa";
-  }else if (d.rate> 0 && d.rate <=0.5){
-      return "#FFCEC5";
-  }else if (d.rate> 0.5 && d.rate <=1){
-      return "#eca395";
-  }else if (d.rate> 1 && d.rate <=1.5){
-      return "#D8472B";
-  }else if (d.rate> 1.5 && d.rate <=2){
-      return "#C46D5D";
-  }else if (d.rate> 2 && d.rate <=2.5){
-      return "#9E4332";
-  }else{
-      return "black";
-  }
-}
-function drawChunk(year){
-    var svg_height = 600;
-    var svg_width = 300;
-    console.log(svg_width);
-    var group_width = svg_width/8
-    var svg = d3.select(".graphic")
-        .append("svg")
-        .attr("width", svg_width)
-        .attr("height", svg_height)
-
-    var howManyAcross = Math.floor(svg_width / 60);
-    var total_height;
-
-    resetGroups();
-    function findPosition(d){
-        var innerIndex = 0, outerIndex = 0;
-            if (d.rate == 0){
-                group_0 += 1;
-                outerIndex = 0;
-                innerIndex = group_0;
-                total_height = 0;
-            }else if (d.rate> 0 && d.rate <=0.5){
-                group_1 += 1;
-                outerIndex = 1;
-                innerIndex = group_1;
-                total_height = 120;
-            }else if (d.rate> 0.5 && d.rate <=1){
-                group_2 += 1;
-                outerIndex = 2;
-                innerIndex = group_2;
-                total_height = 310;
-            }else if (d.rate> 1 && d.rate <=1.5){
-                group_3 += 1;
-                outerIndex = 3;
-                innerIndex = group_3;
-                total_height = 440;
-            }else if (d.rate> 1.5 && d.rate <=2){
-                group_4 += 1;
-                outerIndex = 4;
-                innerIndex = group_4;
-                total_height = 540;
-            }else if (d.rate> 2 && d.rate <=2.5){
-                group_5 += 1;
-                outerIndex = 5;
-                innerIndex = group_5;
-                total_height = 620;
-            }else{
-                group_6 +=1;
-                outerIndex = 6;
-                innerIndex = group_6;
-                total_height = 690;
-            }
-
-            return {'inner': innerIndex, 'outer': outerIndex, 'total_h': total_height};
-
-    }
-
-    var nestedData = d3.nest()
-        .key(function(d){return d.year;})
-        .entries(hospitalData);
-
-    var nestedByid = d3.nest()
-        .key(function(d){return d.id;})
-        .entries(hospitalData);
-    var tooltipDiv = d3.select(".graphic").append("div")
-        .attr("class", "tooltip")
-        .data(nestedByid)
-        .style("opacity", 0);
-
-    function updateChunk(year){
-        var svg_height = 900;
-        d3.selectAll("rect").attr("width", 4)
-            .attr("height",4)
-
-        // console.log(nestedData)
-        var dataYone = nestedData.filter(function(d){
-            return d.key == year;
-        });
-
-        // TODO: DRAW LINECHARTS INSIDE TOOLTIP
-
-        howManyAcross = Math.floor(svg_width/6)
-
-        var oldSquareNum = svg.selectAll("rect")[0].length;
-        var newSquareNum = svg.selectAll("rect")
-            .data(dataYone[0].values)[0].length;
-        var hasExistingRects = (oldSquareNum > 0);
-        var hasNewRects = (newSquareNum > oldSquareNum);
-
-        var squares = svg.selectAll("rect")
-            .data(dataYone[0].values);
-        var newSquares = squares.enter()
-               .append("rect");
-
-        // Step 1: Remove all unused data nodes first.
-        if (newSquareNum < oldSquareNum) {
-          squares.exit()
-            .remove();
-          // reset squares.
-          squares = svg.selectAll("rect")
-              .data(dataYone[0].values);
-        }
-
-        // Step 2: Update current DOM squares.
-        resetGroups();
-        // Old squares and new squares x should be calculated without resetting group.
-
-
-        if (hasExistingRects) {
-          squares = squares.transition()
-            // .delay(function(d, i) { return i * 1; })
-            .duration(1000)
-            .attr("x", function(d,i){
-                var myIndex = findPosition(d);
-                var result = (myIndex.inner %Math.floor(svg_width/5))*5;
-                return result;
-                console.log(svg_width);
-            });
-        }
-        // Step 3: Create new squares.
-        if (hasNewRects){
-          newSquares = addRectAttributes(newSquares, tooltipDiv);
-          newSquares.attr("x", function(d,i){
-              var myIndex = findPosition(d);
-              var result = (myIndex.inner %Math.floor(svg_width/5))*5;
-              return result;
-          });
-        }
-        var group_height;
-        // Old squares and new squares y should be calculated together.
-        resetGroups();
-        if (hasExistingRects) {
-          squares.attr("y", function(d,i){
-            var myIndex = findPosition(d);
-
-            var result = 40 + myIndex.total_h + Math.floor(myIndex.inner/Math.floor(svg_width/5))*5;
-            return result;
-          });
-        }
-        if (hasNewRects){
-          newSquares.attr("y", function(d,i){
-              var myIndex = findPosition(d);
-
-              return 40 + myIndex.total_h + Math.floor(myIndex.inner/Math.floor(svg_width/5))*5;
-          });
-        }
-
-        // Draw the legends
-        var textData = [{"legend":"0","rate":0}, {"legend":"0.01%-0.5%","rate":0.01},{"legend":"0.51%-1%","rate":0.51},{"legend":"1.01%-1.5%","rate":1.01},{"legend":"1.51%-2%","rate":1.51},{"legend":"2.01%-2.5%","rate":2.01},{"legend":"2.51%-3%","rate":2.51}]
-
-        d3.selectAll(".state_text").remove();
-
-        var textGroup = svg.append("g")
-                        .selectAll("text")
-                        .data(textData)
-                        .enter()
-                        .append("text")
-                        .attr("class","distributions_text")
-
-        textGroup.attr("x",function(d){return 0})
-            .attr("y", function(d,i){
-              var myIndex = findPosition(d);
-              return myIndex.total_h +35})
-            .text(function(d){return d.legend})
-            .attr("font-family", "lato,sans-serif")
-                 .attr("font-size", "18px")
-                // .attr("fill", "red");
-            $(".legend_show").hide();
-    }
-
-    updateChunk("FY2018");
-
-    function resizeChunk(){
-
-    }
-
-    function changetoRegion(year){
-
-
-        svg = d3.select("svg")
-            .attr("height", 900) 
-        // First update the graph to the year.
-        updateChunk(year);
-        var dataNew = nestedData.filter(function(d){
-            return d.key == year;
-        });
-
-        var squares = d3.selectAll("svg .squares")
-            .data(dataNew[0].values);
-        squares.transition()
-            // .delay(function(d, i) { return i * 1; })
-            .duration(1000)
-            .attr("width",3)
-            .attr("height",3)
-            .attr("x", function(d,i){
-                var result;
-                    result = d.stateorder * 25+((d.stateposition-1) %Math.floor((svg_width-50)/15/4))*4;
-                return result;
-            })
-            .attr("y", function(d,i){
-                if(d.stategroup == 0 || d.stategroup ==1 || d.stategroup ==2){
-                  var result;
-                    result = 35 + 170*d.stategroup + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/15/4))*4);
-                return result;
-              }else{
-                  var result;
-                      result = 35 + 215*d.stategroup + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/15/4))*4);
-                  return result;
-              }
-                
-
-            })
-
-        squares.enter()
-               .append("rect")
-               .attr("x", function(d,i){
-                var result;
-                    result = 3+d.stateorder * 25+((d.stateposition-1) %Math.floor((svg_width-50)/15/4))*4;
-                return result;
-            })
-            .attr("y", function(d,i){
-                if(d.stategroup == 0 || d.stategroup ==1 || d.stategroup ==2){
-                  var result;
-                    result = 35 + 170*d.stategroup + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/15/4))*4);
-                return result;
-              }else{
-                  var result;
-                      result = 35 + 215*d.stategroup + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/15/4))*4);
-                  return result;
-              }
-
-            })
-
-        var stateData = [{"region":"Northeast","region_code":0,"state":"CT","state_code":0},
-            {"region":"Northeast","region_code":0,"state":"DC","state_code":1},
-            {"region":"Northeast","region_code":0,"state":"DE","state_code":2},
-            {"region":"Northeast","region_code":0,"state":"MA","state_code":3},
-            {"region":"Northeast","region_code":0,"state":"ME","state_code":4},
-            {"region":"Northeast","region_code":0,"state":"NH","state_code":5},
-            {"region":"Northeast","region_code":0,"state":"NJ","state_code":6},
-            {"region":"Northeast","region_code":0,"state":"NY","state_code":7},
-            {"region":"Northeast","region_code":0,"state":"PA","state_code":8},
-            {"region":"Northeast","region_code":0,"state":"VT","state_code":9},
-            {"region":"South","region_code":2,"state":"AL","state_code":0},
-            {"region":"South","region_code":2,"state":"AR","state_code":1},
-            {"region":"South","region_code":2,"state":"FL","state_code":2},
-            {"region":"South","region_code":2,"state":"GA","state_code":3},
-            {"region":"South","region_code":2,"state":"KY","state_code":4},
-            {"region":"South","region_code":2,"state":"LA","state_code":5},
-            {"region":"South","region_code":2,"state":"MS","state_code":6},
-            {"region":"South","region_code":2,"state":"NC","state_code":7},
-            {"region":"South","region_code":2,"state":"OR","state_code":8},
-            {"region":"South","region_code":2,"state":"SC","state_code":9},
-            {"region":"South","region_code":2,"state":"TN","state_code":10},
-            {"region":"South","region_code":2,"state":"TX","state_code":11},
-            {"region":"South","region_code":2,"state":"VA","state_code":12},
-            {"region":"South","region_code":2,"state":"WV","state_code":13},
-            {"region":"Midwest","region_code":1,"state":"IA","state_code":0},
-            {"region":"Midwest","region_code":1,"state":"IL","state_code":1},
-            {"region":"Midwest","region_code":1,"state":"IN","state_code":2},
-            {"region":"Midwest","region_code":1,"state":"KS","state_code":3},
-            {"region":"Midwest","region_code":1,"state":"MI","state_code":4},
-            {"region":"Midwest","region_code":1,"state":"MN","state_code":5},
-            {"region":"Midwest","region_code":1,"state":"MO","state_code":6},
-            {"region":"Midwest","region_code":1,"state":"ND","state_code":7},
-            {"region":"Midwest","region_code":1,"state":"NE","state_code":8},
-            {"region":"Midwest","region_code":1,"state":"OH","state_code":9},
-            {"region":"Midwest","region_code":1,"state":"OK","state_code":10},
-            {"region":"Midwest","region_code":1,"state":"SD","state_code":11},
-            {"region":"Midwest","region_code":1,"state":"WI","state_code":12},
-            {"region":"West","region_code":3,"state":"AK","state_code":0},
-            {"region":"West","region_code":3,"state":"AZ","state_code":1},
-            {"region":"West","region_code":3,"state":"CA","state_code":2},
-            {"region":"West","region_code":3,"state":"CO","state_code":3},
-            {"region":"West","region_code":3,"state":"HI","state_code":4},
-            {"region":"West","region_code":3,"state":"ID","state_code":5},
-            {"region":"West","region_code":3,"state":"MT","state_code":6},
-            {"region":"West","region_code":3,"state":"NM","state_code":7},
-            {"region":"West","region_code":3,"state":"NV","state_code":8},
-            {"region":"West","region_code":3,"state":"VT","state_code":9},
-            {"region":"West","region_code":3,"state":"WA","state_code":10},
-            {"region":"West","region_code":3,"state":"WY","state_code":11}]
-
-            d3.selectAll(".distributions_text").remove();
-
-            var statetextGroup = svg.append("g")
-                        .selectAll("text")
-                        .data(stateData)
-                        .enter()
-                        .append("text")
-                        .attr("class","state_text")
-
-                statetextGroup.attr("x",function(d){
-                        return d.state_code*25
-                   })
-
-                .attr("y",function(d){
-                    if(d.region_code == 0 || d.region_code == 1 || d.region_code ==2){
-                      
-                      return 30+d.region_code * 170
-                    } else{
-                      return 30+d.region_code * 215
-                    }  
-
-                })
-                .text(function(d){return d.state})
-                .attr("font-family", "lato,sans-serif")
-                     .attr("font-size", "10px");
-    } 
-
-
-    function updateMobileChunk(){
-
-
-
-    }
-
-    return {"updateChunk":updateChunk, "resize":resizeChunk, "region":changetoRegion};
-
-}
-
-
-var myChart = drawChunk();
-
-
-var regionShown = false;
-
-$('.year_button_l').on("click",function(){
-        myChart.updateChunk("FY2015");
-        $(".legend_show").hide();
-        $(".active").removeClass("active");
-        $(".region_button").html("See regions");
-        regionShown = false;
-});
-
-$('.year_button_r').on("click",function(){
-        myChart.updateChunk("FY2018");
-        $(".legend_show").hide();
-        $(".region_button").html("See regions");
-        regionShown = false;
-})
-
-$(".region_button").on("click", function(){
-    if (!regionShown) {
-        $(".region_button").html("See distributions")
-        myChart.region("FY2018");
-        $(".legend_show").show();
-        $(".active").removeClass("active");
-        regionShown = true;
-    } else {
-        $(".region_button").html("See regions")
-        myChart.updateChunk("FY2018");
-        $(".legend_show").hide();
-        regionShown = false;
-    }
-});
 
 
 
 
 
-}
-
-$(window).resize(function(){
-    if(window.innerWidth > 1023){
-
-    $('.graphic').html('');
-    drawChunk();
-        myChart.updateChunk("FY2018");
-
-}else{
-    $('.graphic').html('');
-    mobileFunction();
-}
 
 
-});
 
 </script>
 </html>
