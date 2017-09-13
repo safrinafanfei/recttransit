@@ -177,8 +177,8 @@ div.tooltip {
     position: absolute;
     text-align: center;
     width: 110px;
-/*    height: 28px;
-*/    padding: 5px;
+    height: 228px;
+    padding: 5px;
     font: 12px sans-serif;
     background: white;
     border: 1px black solid;
@@ -255,18 +255,68 @@ h1,.toggles,.hovers{
 }
 
 .source{
-        margin: 2% auto;
+    margin: 2% auto;
     color: grey;
     font-size: 12px;
 }
 
-    .legend_show{
-        margin: 0 auto;
-        width: 354px;
-    }
+.legend_show{
+    margin: 0 auto;
+    width: 354px;
+}
+
+.distributions_line{
+  stroke:#b4b4b4;
+  stroke-width:1px;
+  shape-rendering: crispEdges;
+  fill:none;
+  z-index: 10000;
+}
+
+.distributions_text{
+  font-family: arial;
+  font-size:14px;
+
+}
+
+path { 
+    stroke: steelblue;
+    stroke-width: 3;
+    fill: none;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+.tick{
+  font-family:arial;
+  font-weight: 200;
+}
+
+.cht{
+  width:120px;
+  height:120px;
+}
+
+.tp_year{
+  font-weight:bold;
+  font-size:1.5em;
+  margin-bottom: 5px;
+  color:#2B4B6F;
+}
 
 @media only screen and (max-width:768px){
-
+.source{
+    margin: 2% auto;
+    color: grey;
+    font-size: 12px;
+    width:400px;
+}
     
 }
 @media only screen and (max-width:524px) {
@@ -295,6 +345,7 @@ h1,.toggles,.hovers{
 
   text.state_text,.distributions_text {
     font-size: 11px;
+
   }
 
   .graphic {
@@ -390,6 +441,87 @@ function resetGroups() {
   group_0=group_1=group_2=group_3=group_4=group_5=group_6 = -1;
 }
 
+
+var nestedByid = d3.nest()
+        .key(function(d){return d.id;})
+        .entries(hospitalData);
+
+    //start line chart
+
+      function drawLinechart(hospitalId){
+
+
+        
+
+        var currentData = nestedByid.filter(function(d){
+            return d.key == hospitalId;
+        });
+        var margin = {top: 10, right: 15, bottom: 20, left: 20}, 
+        width = 100 - margin.left - margin.right,
+        height = 100 - margin.top - margin.bottom;
+
+// console.log(currentData[0].values)
+
+        var parseDate = d3.time.format("％y").parse;
+        var x = d3.time.scale().range([0, width]);
+        var y = d3.scale.linear().range([height, 0]);
+
+
+
+
+        var formatxAxis = d3.format('.0f');
+
+        var xAxis = d3.svg.axis().scale(x)
+          .orient("bottom")
+          .tickFormat(formatxAxis)
+          .outerTickSize(0)
+          .ticks(3);
+
+        var yAxis = d3.svg.axis().scale(y)
+            .outerTickSize(0)
+            .orient("left").ticks(4);
+
+        var valueline = d3.svg.line()
+            .x(function(d){return x(d.year);})
+            .y(function(d){return y(d.rate);});
+
+
+        var lineChtSvg = d3.select(".lncht")
+              .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        x.domain(d3.extent(currentData[0].values,function(d) { return d.year; }));
+        y.domain([0, 3]);
+
+
+        lineChtSvg.append("path")
+
+        .attr("class", "linecht_line")
+        .attr("d",valueline(currentData[0].values) );
+
+        // Add the X Axis
+        lineChtSvg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+
+
+
+        // Add the Y Axis
+        lineChtSvg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+      
+
+
+    } //end of drawlinechart
+
+
+
 function addRectAttributes(rects, tooltipDiv) {
   rects.attr("width", function(){
     if(window.innerWidth > 769){
@@ -406,18 +538,20 @@ function addRectAttributes(rects, tooltipDiv) {
     }
   })
     .style("fill", fillSquareColor)
-    .attr("id", function(d) {
+    .attr("data-name", function(d) {
         return d.hname + d.State;
         })
     .attr("class", "grid-item squares")
     .on("mouseover", function(d) {
-        $(this).addClass("mouseover")
+        $(this).addClass("mouseover");
         tooltipDiv.transition()
             .duration(200)
             .style("opacity", .9);
-        tooltipDiv.html("<div>" + d.year + "</div>" +  "<div><strong>"+d.hname + "<br/>"+ "<hr>"  + d.rate+"%" +"</strong></div>")
+        tooltipDiv.html("<div><strong>"+toTitleCase(d.hname) +", "+toTitleCase(d.City) + ", "+ d.State + "</div>"+ "<hr>"+"<div class='tp_year'>FY"  + d.year + ": "+ d.rate+"%" +"</strong></div>" +"<div class='lncht' data-id='"+d.id+"'></div>")
             .style("left", (d3.event.pageX+6) + "px")
             .style("top", (d3.event.pageY - 28) + "px");
+        drawLinechart(d.id);
+
         })
     .on("mouseout", function(d) {
         $(this).removeClass("mouseover")
@@ -446,7 +580,7 @@ function fillSquareColor(d) {
 }
 function drawChunk(year){
     $(".graphic").width(850)
-    var svg_height = function(){if(window.innerWidth>769){return 450}else{return 450}};
+    var svg_height = function(){if(window.innerWidth>769){return 480}else{return 450}};
     var svg_width;
     if(window.innerWidth>=550 && window.innerWidth<769){
             svg_width = 354;
@@ -518,9 +652,8 @@ function drawChunk(year){
         .key(function(d){return d.year;})
         .entries(hospitalData);
 
-    var nestedByid = d3.nest()
-        .key(function(d){return d.id;})
-        .entries(hospitalData);
+    
+
     var tooltipDiv = d3.select(".graphic").append("div")
         .attr("class", "tooltip")
         .data(nestedByid)
@@ -528,7 +661,7 @@ function drawChunk(year){
 
     function updateChunk(year){
         $(".graphic").width(850)
-        svg_height = function(){if(window.innerWidth>769){return 450}else{return 450}};
+        svg_height = function(){if(window.innerWidth>769){return 480}else{return 450}};
         if(window.innerWidth>=550 && window.innerWidth<769){
             svg_width = 354;
             $(".graphic").width(354)
@@ -547,7 +680,8 @@ function drawChunk(year){
 
 
         d3.selectAll(".distributions_text").remove();
-
+        d3.selectAll(".region_text").remove();
+        d3.selectAll(".distributions_line").remove();
         // console.log(nestedData)
         var dataYone = nestedData.filter(function(d){
             return d.key == year;
@@ -564,6 +698,7 @@ function drawChunk(year){
             .data(dataYone[0].values);
         var newSquares = squares.enter()
                .append("rect");
+
 
         // Step 1: Remove all unused data nodes first.
         if (newSquareNum < oldSquareNum) {
@@ -669,9 +804,14 @@ function drawChunk(year){
                  .attr("font-size", "18px")
                 // .attr("fill", "red");
         $(".legend_show").hide();
+
+
+        //add a line to each legend
+        
+
     }
 
-    updateChunk("FY2018");
+    updateChunk("2018");
 
 
 
@@ -727,15 +867,15 @@ function drawChunk(year){
                 var result;
                 if(window.innerWidth>769){
                     if(d.stategroup <=1){
-                        result = 50 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6);
+                        result = 15 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6) +50;
                     }else{
-                        result = 350 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6);
+                        result = 315 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6) +50;
                     }
                 }else{
                     if(d.stategroup == 0 || d.stategroup ==1 || d.stategroup ==2){
-                        result = 35 + 230*d.stategroup + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/15/4))*4);
+                        result = 10 + 230*d.stategroup + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/15/4))*4) +50;
                     }else{
-                      result = 35 + 280*d.stategroup + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/15/4))*4);
+                      result = 10 + 280*d.stategroup + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/15/4))*4) +50;
                     }
                 }
                 
@@ -767,17 +907,17 @@ function drawChunk(year){
             var result;
             if(window.innerWidth>769){
                 if(d.stategroup <=1){
-                result = 50 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6);
+                result = 15 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6) +50;
                 }else{
-                    result = 350 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6);
+                    result = 315 + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/32/6))*6) +50;
                 }
             }else{
                 if(d.stategroup == 0 || d.stategroup ==1 || d.stategroup ==2){
                   var result;
-                    result = 35 + 230*d.stategroup + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/15/4))*4);
+                    result = 10 + 230*d.stategroup + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/15/4))*4) +50;
                 }else{
                   var result;
-                      result = 35 + 280*d.stategroup + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/15/4))*4);
+                      result = 10 + 280*d.stategroup + (Math.floor((d.stateposition-1)/Math.floor((svg_width-50)/15/4))*4) +50;
                 }
             }   
                 return result;
@@ -833,6 +973,8 @@ function drawChunk(year){
             {"region":"West","region_code":3,"state":"WA","state_code":10},
             {"region":"West","region_code":3,"state":"WY","state_code":11}]
 
+          var stateLinedata = [{"region":"Northeast","region_code":0},{"region":"Midwest","region_code":1},{"region":"South","region_code":2},{"region":"West","region_code":3}]
+
             d3.selectAll(".distributions_text").remove();
 
             var statetextGroup = svg.append("g")
@@ -858,15 +1000,15 @@ function drawChunk(year){
                 .attr("y",function(d){
                     if(window.innerWidth >769){
                         if(d.region_code <=1){
-                            return 40
+                            return 60
                         }else{
-                            return 340
+                            return 360
                         }
                     }else{
                         if(d.region_code == 0 || d.region_code == 1 || d.region_code ==2){
-                          return 30+d.region_code * 230
+                          return 55+d.region_code * 230
                         } else{
-                          return 30+d.region_code * 280
+                          return 55+d.region_code * 280
                         }  
                     }
                     
@@ -874,7 +1016,113 @@ function drawChunk(year){
                 .text(function(d){return d.state})
                 .attr("font-family", "lato,sans-serif")
                      .attr("font-size", "14px");
-    } 
+
+
+
+                var regiontextGroup = svg.append("g")
+                        .selectAll("text")
+                        .data(stateLinedata)
+                        .enter()
+                        .append("text")
+                        .attr("class","region_text")
+
+                regiontextGroup.attr("x",function(d){
+                    if(window.innerWidth >769){
+                        if(d.region_code <=1){
+
+                            return d.region_code * 420 +150
+                        }else{
+                            return (d.region_code-2) *420 +150
+                        }
+                    }else{
+                        return 140
+                    }
+                    
+                })
+                .attr("y",function(d){
+                    if(window.innerWidth >769){
+                              if(d.region_code <=1){
+                                  return 30
+                              }else{
+                                  return 330
+                              }
+                          }else{
+                              if(d.region_code == 0 || d.region_code == 1 || d.region_code ==2){
+                                return 30+d.region_code * 230
+                              } else{
+                                return 30+d.region_code * 280
+                              }  
+                          }
+                    })
+            
+                .text(function(d){return d.region})
+                .attr("font-family", "lato,sans-serif")
+                     .attr("font-size", "14px");
+
+
+                var legendLines = svg.append("g")
+                      .selectAll("line")
+                      .data(stateLinedata)
+                      .enter()
+                      .append("line")
+                      .attr("class","distributions_line")
+                      .attr("x1", function(d){
+                          if(window.innerWidth >769){
+                            if(d.region_code <=1){
+
+                                return d.region_code * 420
+                            }else{
+                                return (d.region_code-2) *420
+                            }
+                          }else{
+                              return 0
+                          }
+                        })
+                      .attr("y1",function(d){
+                          if(window.innerWidth >769){
+                              if(d.region_code <=1){
+                                  return 40
+                              }else{
+                                  return 340
+                              }
+                          }else{
+                              if(d.region_code == 0 || d.region_code == 1 || d.region_code ==2){
+                                return 40+d.region_code * 230
+                              } else{
+                                return 40+d.region_code * 280
+                              }  
+                          }
+                          
+                      })
+                      .attr("x2", function(d){
+                          if(window.innerWidth >769){
+                            if(d.region_code <=1){
+
+                                return (d.region_code+1)* 420 -10
+                            }else{
+                                return (d.region_code-1) *420 -10
+                            }
+                          }else{
+                              return 300
+                          }
+                        })
+                      .attr("y2",function(d){
+                          if(window.innerWidth >769){
+                              if(d.region_code <=1){
+                                  return 40
+                              }else{
+                                  return 340
+                              }
+                          }else{
+                              if(d.region_code == 0 || d.region_code == 1 || d.region_code ==2){
+                                return 40+d.region_code * 230
+                              } else{
+                                return 40+d.region_code * 280
+                              }  
+                          }
+                          
+                      })
+                } 
 
 
 
@@ -913,7 +1161,7 @@ var regionShown = false;
 
 
 $('.year_button_l').on("click",function(){
-        myChart.updateChunk("FY2015");
+        myChart.updateChunk("2015");
         $(".legend_show").hide();
         $(".active").removeClass("active");
         $(".region_button").html("See regions");
@@ -921,7 +1169,7 @@ $('.year_button_l').on("click",function(){
 });
 
 $('.year_button_r').on("click",function(){
-        myChart.updateChunk("FY2018");
+        myChart.updateChunk("2018");
         $(".legend_show").hide();
         $(".region_button").html("See regions");
         regionShown = false;
@@ -930,13 +1178,13 @@ $('.year_button_r').on("click",function(){
 $(".region_button").on("click", function(){
     if (!regionShown) {
         $(".region_button").html("See distributions")
-        myChart.region("FY2018");
+        myChart.region("2018");
         $(".legend_show").show();
         $(".active").removeClass("active");
         regionShown = true;
     } else {
         $(".region_button").html("See regions")
-        myChart.updateChunk("FY2018");
+        myChart.updateChunk("2018");
         $(".legend_show").hide();
         regionShown = false;
     }
@@ -944,6 +1192,10 @@ $(".region_button").on("click", function(){
 
 
 
+function toTitleCase(str)
+{
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
 
 
 
