@@ -437,6 +437,17 @@ path {
 
 <script type="text/javascript">
 var group_0=group_1=group_2=group_3=group_4=group_5=group_6 = -1;
+const NESTED_DATA = d3.nest()
+    .key(function(d){return d.year;})
+    .entries(hospitalData);
+const HOME_YEAR = "2018";
+const PREV_YEAR = "2015"; 
+
+var HOME_YEAR_DATA_MAP = {};
+NESTED_DATA.filter(d=>(d.key === HOME_YEAR))[0].values.forEach(function(d){
+    HOME_YEAR_DATA_MAP[d.id + d.City] = d;
+  });
+
 function resetGroups() {
   group_0=group_1=group_2=group_3=group_4=group_5=group_6 = -1;
 }
@@ -539,15 +550,24 @@ function addRectAttributes(rects, tooltipDiv) {
   })
     .style("fill", fillSquareColor)
     .attr("data-name", function(d) {
-        return d.hname + d.State;
+        homeD = HOME_YEAR_DATA_MAP[d.id + d.City];
+        if (!homeD) {
+          return;
+        }
+        return homeD.hname + homeD.State;
         })
     .attr("class", "grid-item squares")
     .on("mouseover", function(d) {
+        
+        homeD = HOME_YEAR_DATA_MAP[d.id + d.City];
+        if (!homeD) {
+          return;
+        }
         $(this).addClass("mouseover");
         tooltipDiv.transition()
             .duration(200)
             .style("opacity", .9);
-        tooltipDiv.html("<div><strong>"+toTitleCase(d.hname) +", "+toTitleCase(d.City) + ", "+ d.State + "</div>"+ "<hr>"+"<div class='tp_year'>FY"  + d.year + ": "+ d.rate+"%" +"</strong></div>" +"<div class='lncht' data-id='"+d.id+"'></div>")
+        tooltipDiv.html("<div><strong>"+toTitleCase(homeD.hname) +", "+toTitleCase(homeD.City) + ", "+ homeD.State + "</div>"+ "<hr>"+"<div class='tp_year'>FY"  + d.year + ": "+ d.rate+"%" +"</strong></div>" +"<div class='lncht' data-id='"+d.id+"'></div>")
             .style("left", (d3.event.pageX+6) + "px")
             .style("top", (d3.event.pageY - 28) + "px");
         drawLinechart(d.id);
@@ -648,12 +668,6 @@ function drawChunk(year){
 
     }
 
-    var nestedData = d3.nest()
-        .key(function(d){return d.year;})
-        .entries(hospitalData);
-
-    
-
     var tooltipDiv = d3.select(".graphic").append("div")
         .attr("class", "tooltip")
         .data(nestedByid)
@@ -682,8 +696,8 @@ function drawChunk(year){
         d3.selectAll(".distributions_text").remove();
         d3.selectAll(".region_text").remove();
         d3.selectAll(".distributions_line").remove();
-        // console.log(nestedData)
-        var dataYone = nestedData.filter(function(d){
+        // console.log(NESTED_DATA)
+        var dataYone = NESTED_DATA.filter(function(d){
             return d.key == year;
         });
 
@@ -716,6 +730,19 @@ function drawChunk(year){
           squares = squares.transition()
             // .delay(function(d, i) { return i * 1; })
             .duration(1000)
+            .attr('display', function(d){
+              if (!HOME_YEAR_DATA_MAP[d.id + d.City]) {
+                return 'none';
+              }
+              return 'block';
+            })
+            .style("fill", function(d) {
+              if (!HOME_YEAR_DATA_MAP[d.id + d.City]) {
+                console.log('2015 data not found in 2018. id:' + d.id +"\tcity: " + d.city);
+                return 'red';
+              }
+              return fillSquareColor(HOME_YEAR_DATA_MAP[d.id + d.City]);
+            })
             .attr("x", function(d,i){
                 if(window.innerWidth>769){
                     var myIndex = findPosition(d);
@@ -835,7 +862,7 @@ function drawChunk(year){
         .attr("width", svg_width)
         .attr("height", svg_height)
         // First update the graph to the year.
-        var dataNew = nestedData.filter(function(d){
+        var dataNew = NESTED_DATA.filter(function(d){
             return d.key == year;
         });
 
